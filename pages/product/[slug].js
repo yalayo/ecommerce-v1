@@ -5,33 +5,12 @@ import { Product } from '../../components';
 
 import { useStateContext } from '../../context/StateContext';
 
-export const getStaticPaths = async () => {
-    const query = `*[_type == "product"] {
-        slug {
-            current
-        }
-    }  
-    `;
-
-    const products = await client.fetch(query);
-
-    const paths = products.map((product) => ({
-        //when parenthesis and curly braces we return instantly an object
-        params: {
-            slug: product.slug.current 
-        }
-    }));
-    return {
-        paths, 
-        fallback: 'blocking' 
-    }
-}
-
 
 const ProductDetails = ({ product, products }) => {
+    console.log(product.name);
     
     const { image, name, details, price } = product;
-    const [index, setIndex] = useState(0);
+    const [ index, setIndex ] = useState(0);
     const { decQty, incQty, qty, onAdd, setShowCart } = useStateContext();
 
     const handleBuyNow = () => {
@@ -105,12 +84,37 @@ const ProductDetails = ({ product, products }) => {
     );
 }
 
+export const getStaticPaths = async () => {
+    const query = `*[_type == "product"] {
+        slug {
+            current
+        }
+    }  
+    `;
+
+    const products = await client.fetch(query);
+
+    const paths = products.map((product) => ({
+        //when parenthesis and curly braces we return instantly an object
+        params: {
+            slug: product.slug.current 
+        }
+    }));
+    
+    return {
+        paths, 
+        fallback: 'blocking' 
+    }
+}
+
 export const getStaticProps = async ({ params: { slug } } ) => {
     const query = `*[_type == "product" && slug.current == '${slug}'] [0]`;
     const productQuery = '*[_type == "product"]'
     const product = await client.fetch(query);
     const products = await client.fetch(productQuery);
-  
+    
+    console.log(product);
+
     return {
       props: { products, product }
     }
